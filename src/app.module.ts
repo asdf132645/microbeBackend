@@ -6,19 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { createTypeOrmOptions } from '../ormconfig';
 import { UserModule } from './user/user.module';
 import { CellImgAnalyzedModule } from './settings/analysisDatabse/cellImgAnalyzed/cell.module';
-import { RbcDegreeModule } from './settings/analysisDatabse/rbcDegree/rbcDegree.module';
-import { WbcCustomClassModule } from './settings/analysisDatabse/wbcCustomClass/wbcCustomClass.module';
-import { WbcHotKeysModule } from './settings/analysisDatabse/wbcHotKeys/wbcHotKeys.module';
-import { NormalRangeModule } from './settings/analysisDatabse/normalRange/normalRange.module';
-import { BfHotKeysModule } from './settings/analysisDatabse/bhHotKeys/bfHotKeys.module';
+import { GramRangeModule } from './settings/analysisDatabse/gramRange/gramRange.module';
 import { ImagePrintModule } from './settings/report/imagePrint/imagePrint.module';
-import { LisCodeWbcModule } from './settings/report/lisCode/wbc/lisCodeWbc.module';
-import { LisCodeRbcModule } from './settings/report/lisCode/rbc/lisCodeRbc.module';
 import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
 import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
-import { WbcRunCountModule } from './settings/report/runInfoCount/wbcRunCount.module';
 import { JsonReaderModule } from './jsonReader/jsonReader.module';
-import { MinCountModule } from './settings/report/minCount/minCount.module';
 import { RuningInfoModule } from './runingInfo/runingInfo.module';
 import { ImagesController } from './images/images.controller';
 import { ExcelService } from './excel/excel.service';
@@ -60,19 +52,11 @@ import { CbcModule } from './lisMakeData/cbc.module';
     // }),
     UserModule,
     CellImgAnalyzedModule,
-    RbcDegreeModule,
-    WbcCustomClassModule,
-    WbcHotKeysModule,
-    NormalRangeModule,
-    BfHotKeysModule,
+    GramRangeModule,
     ImagePrintModule,
-    LisCodeWbcModule,
-    LisCodeRbcModule,
     CbcCodeModule,
     FilePathSetModule,
-    WbcRunCountModule,
     JsonReaderModule,
-    MinCountModule,
     RuningInfoModule,
     CombinedModule,
     IpModule,

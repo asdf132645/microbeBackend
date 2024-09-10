@@ -7,14 +7,14 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class NormalRangeDto {
+export class GramRangeDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => normalRangeItems)
-  normalRangeItems: normalRangeItems[];
+  @Type(() => gramRangeItems)
+  gramRangeItems: gramRangeItems[];
 }
 
-export class normalRangeItems {
+export class gramRangeItems {
   @IsInt()
   @IsOptional()
   id?: number;
@@ -23,17 +23,29 @@ export class normalRangeItems {
   classId: string;
 
   @IsString()
-  min: number;
+  rareMost: string;
 
-  @IsInt()
-  max: number;
+  @IsString()
+  fewLeast: string;
 
-  @IsInt()
-  unit: string;
+  @IsString()
+  fewMost: string;
+
+  @IsString()
+  moderateLeast: string;
+
+  @IsString()
+  moderateMost: string;
+
+  @IsString()
+  manyLeast: string;
 
   @IsString()
   abbreviation: string;
 
   @IsString()
   fullNm: string;
+
+  @IsString()
+  unit: string;
 }

@@ -4,11 +4,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { RbcDegree } from '../../settings/analysisDatabse/rbcDegree/rbcDegree.entity';
 
 @Entity('user')
 export class User {
@@ -49,12 +46,4 @@ export class User {
     description: 'Latest update date',
   })
   latestDate: Date;
-
-  // @Column({ nullable: true })
-  // @ApiProperty({
-  //   example: '192.65.131.55',
-  //   description: 'User ip',
-  //   nullable: true,
-  // })
-  // pcIp?: string;
 }
