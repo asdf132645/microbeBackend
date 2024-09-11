@@ -33,6 +33,10 @@ export class User {
   @ApiProperty({ example: 'admin', description: 'User type' })
   userType: string;
 
+  @Column()
+  @ApiProperty({ example: false, description: 'User logged in' })
+  isLoggedIn: boolean;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @ApiProperty({
     example: '2024-02-13T12:34:56Z',

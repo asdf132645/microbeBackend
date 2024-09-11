@@ -16,6 +16,9 @@ export class CreateUserDto {
   @ApiProperty({ example: 'admin', description: 'User type' })
   userType: string;
 
+  @ApiProperty({ example: false, description: 'User logged in' })
+  isLoggedIn: boolean;
+
   @ApiProperty({
     example: '2024-02-13T12:34:56Z',
     description: 'Subscription date',
@@ -31,7 +34,6 @@ export class CreateUserDto {
   // @ApiProperty({ example: 'pcIp', description: 'pcIp', nullable: true })
   // pcIp?: string;
 }
-
 
 export class UserResponse {
   @ApiProperty({ example: 'honggildong', description: 'User ID' })

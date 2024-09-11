@@ -1,17 +1,9 @@
 // create-cellImg.dto.ts
 export class CellImgAnalyzedDto {
-  id?: number;
+  id: number;
   analysisType: string;
-  diffCellAnalyzingCount: string;
-  pbsCellAnalyzingCount: string;
-  bfCellAnalyzingCount: string;
-  diffWbcPositionMargin: string;
-  diffRbcPositionMargin: string;
-  diffPltPositionMargin: string;
-  stitchCount: string;
-  sideEdgeWbcMode: string;
+  LPCaptureCount: string;
   iaRootPath: string;
-  isNsNbIntegration: boolean;
   isAlarm: boolean;
   alarmCount: string;
   keepPage: boolean;

@@ -4,15 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CellImgAnalyzed } from './entities/cell.entity';
 import { CellImgAnalyzedDto } from './dto/create-cellImg.dto';
-import { User } from '../../../user/entities/user.entity'; // Import the User entity
 
 @Injectable()
 export class CellImgAnalyzedService {
   constructor(
     @InjectRepository(CellImgAnalyzed)
     private readonly cellImgAnalyzedRepository: Repository<CellImgAnalyzed>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(dto: CellImgAnalyzedDto): Promise<CellImgAnalyzed> {
