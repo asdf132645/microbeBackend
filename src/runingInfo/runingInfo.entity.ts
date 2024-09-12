@@ -33,9 +33,6 @@ export class RuningInfoEntity {
   birthDay: string;
 
   @Column()
-  wbcCount: string;
-
-  @Column()
   slotId: string;
 
   @Column()
@@ -47,38 +44,11 @@ export class RuningInfoEntity {
   @Column()
   analyzedDttm: string;
 
-  // @Column()
-  // createDate: string;
-
-  // @Column()
-  // pltCount: string;
-  //
-  // @Column()
-  // malariaCount: string;
-  //
-  // @Column()
-  // maxRbcCount: string;
-
-  // @Column()
-  // stateCd: string;
-
   @Column()
   tactTime: string;
 
   @Column()
-  maxWbcCount: string;
-
-  @Column('json')
-  bf_lowPowerPath: any[];
-
-  // @Column('json')
-  // runningPath: any[];
-
-  // @Column('json')
-  // bminfo: any[];
-
-  // @Column()
-  // userId: number;
+  totalMoCount: string;
 
   @Column()
   cassetId: string;
@@ -87,39 +57,11 @@ export class RuningInfoEntity {
   isNormal: string;
 
   @Column('json')
-  wbcInfo: any[];
+  moInfo: any[];
 
   @Column('json')
-  wbcInfoAfter: any[];
+  moInfoAfter: any[];
 
-  // @Column('json')
-  // bmInfoAfter: any[];
-
-  @Column('json')
-  rbcInfo: any[];
-
-  @Column('json')
-  rbcInfoAfter: any[];
-
-  // @Column('json')
-  // processInfo: {
-  //   cassetteNo: number;
-  //   barcodeId: string;
-  //   patientId: string;
-  //   patientName: string;
-  //   wbcCount: string;
-  //   orderDate: string;
-  //   analyzedDttm: string;
-  // };
-
-  // @Column('json')
-  // orderList: {
-  //   barcodeId: string;
-  //   patientName: string;
-  //   orderDate: string;
-  //   analyzedDttm: string;
-  //   state: string;
-  // }[];
   @Column()
   submitState?: string;
 
@@ -129,29 +71,11 @@ export class RuningInfoEntity {
   @Column()
   submitUserId?: string;
 
-  @Column('json')
-  rbcInfoPosAfter: any[];
-
-  // @Column('json')
-  // classificationResult?: any[];
-
   @Column()
-  isNsNbIntegration?: string;
-
-  @Column()
-  wbcMemo?: string;
-
-  @Column()
-  rbcMemo?: string;
+  moMemo?: string;
 
   @Column()
   pcIp?: string;
-
-  // @Column()
-  // siteCd?: string;
-
-  // @Column()
-  // deviceBarcode?: string;
 
   @Column()
   cbcPatientNo?: string;

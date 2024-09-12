@@ -68,7 +68,6 @@ export class RuningInfoService {
         existingEntity.patientNm = item.patientNm;
         existingEntity.gender = item.gender;
         existingEntity.birthDay = item.birthDay;
-        existingEntity.wbcCount = item.wbcCount;
         existingEntity.slotId = item.slotId;
         existingEntity.orderDttm = item.orderDttm;
         existingEntity.testType = item.testType;
@@ -78,17 +77,13 @@ export class RuningInfoService {
         existingEntity.cbcAge = item.cbcAge;
         // existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
-        existingEntity.maxWbcCount = item.maxWbcCount;
-        existingEntity.bf_lowPowerPath = item.bf_lowPowerPath;
         // existingEntity.runningPath = item.runningPath;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
-        existingEntity.wbcMemo = item.wbcMemo;
-        existingEntity.rbcMemo = item.rbcMemo;
+        existingEntity.moMemo = item.moMemo;
         existingEntity.lock_status = item.lock_status;
         existingEntity.pcIp = item.pcIp;
-        existingEntity.rbcInfoAfter = item.rbcInfoAfter;
-        existingEntity.wbcInfoAfter = item.wbcInfoAfter;
+        existingEntity.moInfoAfter = item.moInfoAfter;
         existingEntity.submitState = item.submitState;
         existingEntity.submitOfDate = item.submitOfDate;
         existingEntity.submitUserId = item.submitUserId;
@@ -134,7 +129,6 @@ export class RuningInfoService {
     barcodeNo?: string,
     patientId?: string,
     patientNm?: string,
-    nrCount?: string,
     titles?: string[],
     testType?: string,
     wbcCountOrder?: string,
@@ -187,39 +181,18 @@ export class RuningInfoService {
       queryBuilder.andWhere('runInfo.testType = :testType', { testType });
     }
 
-    if (nrCount !== '0' && nrCount !== '') {
-      const query = `
-    JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :titlePath, NULL, '$[*].title') IS NOT NULL
-    AND (
-      SELECT COUNT(*)
-      FROM JSON_TABLE(
-        runInfo.wbcInfoAfter,
-        '$[*]' COLUMNS(
-          title VARCHAR(255) PATH '$.title',
-          count INT PATH '$.count'
-        )
-      ) AS jt
-      WHERE jt.title = :titleParam
-        AND jt.count = :nrCount
-    ) > 0
-  `;
-      queryBuilder.andWhere(query, {
-        titlePath: 'NR',
-        titleParam: 'NR',
-        nrCount: parseInt(nrCount, 10),
-      });
-    }
+    console.log('으잉');
 
     if (titles && titles.length > 0) {
       const orConditions = titles
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.wbcInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+            (JSON_SEARCH(runInfo.moInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
             AND (
               SELECT COUNT(*)
               FROM JSON_TABLE(
-                runInfo.wbcInfoAfter,
+                runInfo.moInfoAfter,
                 '$[*]' COLUMNS(
                   title VARCHAR(255) PATH '$.title',
                   count INT PATH '$.count'
@@ -246,16 +219,6 @@ export class RuningInfoService {
 
     // eslint-disable-next-line prefer-const
     let [data, total] = await queryBuilder.getManyAndCount();
-
-    if (wbcCountOrder) {
-      data.sort((a, b) => {
-        const aCount = Number(a.wbcCount);
-        const bCount = Number(b.wbcCount);
-        return wbcCountOrder.toUpperCase() === 'ASC'
-          ? aCount - bCount
-          : bCount - aCount;
-      });
-    }
     if (pageSize && page) {
       data = data.slice((page - 1) * pageSize, page * pageSize);
     }
@@ -309,7 +272,7 @@ export class RuningInfoService {
       SELECT 
         id,
         slotId,
-        wbcInfoAfter,
+        moInfoAfter,
         testType,
         barcodeNo,
         patientId,
@@ -319,9 +282,8 @@ export class RuningInfoService {
         cbcSex,
         cbcAge,
         analyzedDttm,
-        wbcInfo,
+        moInfo,
         img_drive_root_path,
-        rbcInfoAfter
       FROM 
         runing_info_entity
       WHERE 
@@ -343,12 +305,11 @@ export class RuningInfoService {
     const query = `
       SELECT 
         id,
-        wbcInfoAfter,
-        wbcInfo,
+        moInfoAfter,
+        moInfo,
         testType,
         submitState,
-        img_drive_root_path,
-        rbcInfoAfter
+        img_drive_root_path
       FROM 
         runing_info_entity
       WHERE 
@@ -373,11 +334,10 @@ export class RuningInfoService {
       SELECT 
         id,
         lock_status,
-        wbcInfoAfter,
-        wbcInfo,
+        moInfoAfter,
+        moInfo,
         testType,
-        img_drive_root_path,
-        rbcInfoAfter
+        img_drive_root_path
       FROM 
         runing_info_entity
       WHERE 
@@ -425,7 +385,6 @@ export class RuningInfoService {
           id,
           analyzedDttm,
           barcodeNo,
-          bf_lowPowerPath,
           birthDay,
           cassetId,
           cbcAge,
@@ -435,16 +394,15 @@ export class RuningInfoService {
           gender,
           img_drive_root_path,
           isNormal,
-          isNsNbIntegration,
           lock_status,
-          maxWbcCount,
+          totalMoCount,
           orderDttm,
           patientId,
           patientNm,
           pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
+          moInfo,
+          moInfoAfter,
+          moMemo,
           slotId,
           slotNo,
           submitOfDate,
@@ -453,10 +411,6 @@ export class RuningInfoService {
           tactTime,
           testType,
           traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
         FROM 
           runing_info_entity
         WHERE 
@@ -481,16 +435,12 @@ export class RuningInfoService {
           gender,
           img_drive_root_path,
           isNormal,
-          isNsNbIntegration,
           lock_status,
-          maxWbcCount,
+          totalMoCount,
           orderDttm,
           patientId,
           patientNm,
           pcIp,
-          rbcInfo,
-          rbcInfoAfter,
-          rbcMemo,
           slotId,
           slotNo,
           submitOfDate,
@@ -499,10 +449,9 @@ export class RuningInfoService {
           tactTime,
           testType,
           traySlot,
-          wbcCount,
-          wbcInfoAfter,
-          wbcInfo,
-          wbcMemo
+          moInfoAfter,
+          moInfo,
+          moMemo
         FROM 
           runing_info_entity
         WHERE 
@@ -523,7 +472,6 @@ export class RuningInfoService {
         id: result.id,
         analyzedDttm: result.analyzedDttm,
         barcodeNo: result.barcodeNo,
-        bf_lowPowerPath: result.bf_lowPowerPath,
         birthDay: result.birthDay,
         cassetId: result.cassetId,
         cbcAge: result.cbcAge,
@@ -533,16 +481,12 @@ export class RuningInfoService {
         gender: result.gender,
         img_drive_root_path: result.img_drive_root_path,
         isNormal: result.isNormal,
-        isNsNbIntegration: result.isNsNbIntegration,
         lock_status: result.lock_status,
-        maxWbcCount: result.maxWbcCount,
+        totalMoCount: result.totalMoCount,
         orderDttm: result.orderDttm,
         patientId: result.patientId,
         patientNm: result.patientNm,
         pcIp: result.pcIp,
-        rbcInfo: result.rbcInfo,
-        rbcInfoAfter: result.rbcInfoAfter,
-        rbcMemo: result.rbcMemo,
         slotId: result.slotId,
         slotNo: result.slotNo,
         submitOfDate: result.submitOfDate,
@@ -551,10 +495,9 @@ export class RuningInfoService {
         tactTime: result.tactTime,
         testType: result.testType,
         traySlot: result.traySlot,
-        wbcCount: result.wbcCount,
-        wbcInfoAfter: result.wbcInfoAfter,
-        wbcInfo: result.wbcInfo,
-        wbcMemo: result.wbcMemo,
+        moInfoAfter: result.moInfoAfter,
+        moInfo: result.moInfo,
+        moMemo: result.moMemo,
       } as Partial<RuningInfoEntity>;
     } else {
       return null;
