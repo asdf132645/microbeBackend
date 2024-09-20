@@ -75,19 +75,18 @@ export class RuningInfoService {
         existingEntity.cbcPatientNm = item.cbcPatientNm;
         existingEntity.cbcSex = item.cbcSex;
         existingEntity.cbcAge = item.cbcAge;
-        // existingEntity.stateCd = item.stateCd;
         existingEntity.tactTime = item.tactTime;
-        // existingEntity.runningPath = item.runningPath;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
         existingEntity.moMemo = item.moMemo;
+        existingEntity.moInfo = item.moInfo;
         existingEntity.lock_status = item.lock_status;
         existingEntity.pcIp = item.pcIp;
-        existingEntity.moInfoAfter = item.moInfoAfter;
         existingEntity.submitState = item.submitState;
         existingEntity.submitOfDate = item.submitOfDate;
         existingEntity.submitUserId = item.submitUserId;
         existingEntity.img_drive_root_path = item.img_drive_root_path;
+
         await this.runingInfoEntityRepository.save(existingEntity);
         updatedItems.push(existingEntity);
       }
@@ -181,18 +180,16 @@ export class RuningInfoService {
       queryBuilder.andWhere('runInfo.testType = :testType', { testType });
     }
 
-    console.log('으잉');
-
     if (titles && titles.length > 0) {
       const orConditions = titles
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.moInfoAfter, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+            (JSON_SEARCH(runInfo.moInfo, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
             AND (
               SELECT COUNT(*)
               FROM JSON_TABLE(
-                runInfo.moInfoAfter,
+                runInfo.moInfo,
                 '$[*]' COLUMNS(
                   title VARCHAR(255) PATH '$.title',
                   count INT PATH '$.count'
@@ -272,7 +269,6 @@ export class RuningInfoService {
       SELECT 
         id,
         slotId,
-        moInfoAfter,
         testType,
         barcodeNo,
         patientId,
@@ -305,7 +301,6 @@ export class RuningInfoService {
     const query = `
       SELECT 
         id,
-        moInfoAfter,
         moInfo,
         testType,
         submitState,
@@ -334,7 +329,6 @@ export class RuningInfoService {
       SELECT 
         id,
         lock_status,
-        moInfoAfter,
         moInfo,
         testType,
         img_drive_root_path
@@ -383,34 +377,33 @@ export class RuningInfoService {
       newEntityQuery = `
         SELECT 
           id,
-          analyzedDttm,
-          barcodeNo,
-          birthDay,
-          cassetId,
-          cbcAge,
-          cbcPatientNm,
-          cbcPatientNo,
-          cbcSex,
-          gender,
-          img_drive_root_path,
-          isNormal,
+          testType,
           lock_status,
-          totalMoCount,
-          orderDttm,
+          traySlot,
+          barcodeNo,
           patientId,
           patientNm,
-          pcIp,
-          moInfo,
-          moInfoAfter,
-          moMemo,
-          slotId,
-          slotNo,
-          submitOfDate,
-          submitState,
-          submitUserId,
+          analyzedDttm,
           tactTime,
-          testType,
-          traySlot,
+          submitState,
+          submitOfDate,
+          slotNo,
+          cassetId,
+          slotId,
+          orderDttm,
+          gender,
+          birthDay,
+          totalMoCount,
+          isNormal,
+          moInfo,
+          submitUserId,
+          moMemo,
+          pcIp,
+          cbcPatientNo,
+          cbcPatientNm,
+          cbcSex,
+          cbcAge,
+          img_drive_root_path
         FROM 
           runing_info_entity
         WHERE 
@@ -425,7 +418,6 @@ export class RuningInfoService {
           id,
           analyzedDttm,
           barcodeNo,
-          bf_lowPowerPath,
           birthDay,
           cassetId,
           cbcAge,
@@ -449,7 +441,6 @@ export class RuningInfoService {
           tactTime,
           testType,
           traySlot,
-          moInfoAfter,
           moInfo,
           moMemo
         FROM 
@@ -465,6 +456,7 @@ export class RuningInfoService {
       id,
       step - 1,
     ]);
+    console.log('제발', newEntityResult);
 
     if (newEntityResult.length > 0) {
       const result = newEntityResult[0];
@@ -495,7 +487,6 @@ export class RuningInfoService {
         tactTime: result.tactTime,
         testType: result.testType,
         traySlot: result.traySlot,
-        moInfoAfter: result.moInfoAfter,
         moInfo: result.moInfo,
         moMemo: result.moMemo,
       } as Partial<RuningInfoEntity>;

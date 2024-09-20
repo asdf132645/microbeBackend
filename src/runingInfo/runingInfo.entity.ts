@@ -59,9 +59,6 @@ export class RuningInfoEntity {
   @Column('json')
   moInfo: any[];
 
-  @Column('json')
-  moInfoAfter: any[];
-
   @Column()
   submitState?: string;
 

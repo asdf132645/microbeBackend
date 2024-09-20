@@ -22,7 +22,6 @@ export class RuningInfoDtoItems {
   orderDttm: string;
   totalMoCount: string;
   moInfo: any[];
-  moInfoAfter?: any[];
   cassetId: string;
   isNormal: string;
   submitUserId?: string;
