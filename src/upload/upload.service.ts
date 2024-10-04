@@ -3,7 +3,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
+import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
 import { exec } from 'child_process';
@@ -12,8 +12,8 @@ import { exec } from 'child_process';
 export class UploadService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    @InjectRepository(RuningInfoEntity)
-    private readonly runningInfoRepository: Repository<RuningInfoEntity>,
+    @InjectRepository(RunningInfoEntity)
+    private readonly runningInfoRepository: Repository<RunningInfoEntity>,
     private readonly logger: LoggerService,
   ) {}
   private moveResults = { success: 0, total: 0 };

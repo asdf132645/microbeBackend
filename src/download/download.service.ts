@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, In } from 'typeorm';
-import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
+import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { DownloadDto, DownloadReturn } from './download.dto';
 import { exec } from 'child_process';
 import * as fs from 'fs-extra';
@@ -13,8 +13,8 @@ import { LoggerService } from '../logger.service';
 @Injectable()
 export class DownloadService {
   constructor(
-    @InjectRepository(RuningInfoEntity)
-    private readonly runningInfoRepository: Repository<RuningInfoEntity>,
+    @InjectRepository(RunningInfoEntity)
+    private readonly runningInfoRepository: Repository<RunningInfoEntity>,
     private readonly logger: LoggerService,
   ) {}
   private moveResults = { success: 0, total: 0 };

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
-import { RuningInfoService } from '../runingInfo/runingInfo.service';
+import { RunningInfoService } from '../runingInfo/runningInfo.service';
 // import { Readable } from 'stream';
 
 dotenv.config(); // dotenv 설정 추가
@@ -34,7 +34,7 @@ export class CombinedService
 
   constructor(
     private readonly logger: LoggerService,
-    private readonly runingInfoService: RuningInfoService,
+    private readonly runingInfoService: RunningInfoService,
   ) {}
 
   // 이전 reqDttm 값을 갱신하는 함수

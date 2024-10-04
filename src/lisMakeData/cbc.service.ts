@@ -69,7 +69,7 @@ export class CbcService {
     const queryString = new URLSearchParams(queryParamsCopy).toString();
     const url = `${queryParams.baseUrl}?${queryString}`;
     this.logger.cbcLis(`cbc-service-fetchExternalData: ${url}`);
-    const curlCommand = `curl -s "${url}"`; // -s 옵션을 사용하여 진행 상황 출력 숨김
+    const curlCommand = `curl -s "${url}"`; // -class-info.ts 옵션을 사용하여 진행 상황 출력 숨김
     try {
       const { stdout, stderr } = await execPromise(curlCommand);
       if (stderr) {

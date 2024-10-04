@@ -11,7 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { LoggerService } from '../logger.service';
 import * as dotenv from 'dotenv';
-import { RuningInfoService } from '../runingInfo/runingInfo.service';
+import { RunningInfoService } from '../runingInfo/runningInfo.service';
 import { isServerRunningLocally } from '../utils/network';
 import { BrowserService } from '../browserExit/browser.service';
 
@@ -42,7 +42,7 @@ export class CombinedService
 
   constructor(
     private readonly logger: LoggerService,
-    private readonly runingInfoService: RuningInfoService,
+    private readonly runingInfoService: RunningInfoService,
     private readonly browserService: BrowserService,
   ) {}
 
@@ -96,6 +96,7 @@ export class CombinedService
     const ipAddress = this.extractIPAddress(clientIpAddress);
     this.clients.push(client);
     this.logger.log(`WebSocket 클라이언트 연결됨: ${client.conn}`);
+    await this.runingInfoService.addUniqueConstraintToSlotId();
 
     this.serverIp = await isServerRunningLocally();
     this.wss.emit('multiViewer', client.conn.remoteAddress);
@@ -353,5 +354,14 @@ export class CombinedService
     } else {
       this.logger.error('🚨 최대 재연결 시도 횟수 초과.');
     }
+  }
+
+  sendIsDownloadUploadFinished(status: 'download' | 'upload') {
+    const state = {
+      status,
+      isFinished: true,
+    };
+
+    this.wss.emit('downloadUploadFinished', state);
   }
 }

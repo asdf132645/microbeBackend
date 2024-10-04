@@ -5,7 +5,7 @@ import { GramRange } from './src/settings/analysisDatabse/gramRange/gramRange.en
 import { ImagePrintEntity } from './src/settings/report/imagePrint/imagePrint.entity';
 import { CbcCodeEntity } from './src/settings/report/cbcCode/cbcCode.entity';
 import { FilePathSetEntity } from './src/settings/report/filrPathSet/filePathSetEntity';
-import { RuningInfoEntity } from './src/runingInfo/runingInfo.entity';
+import { RunningInfoEntity } from './src/runingInfo/runningInfo.entity';
 import { ClassOrder } from './src/classOrder/classOrder';
 import * as dotenv from 'dotenv';
 import { DeviceEntity } from './src/device/device.entity';
@@ -28,7 +28,7 @@ export const createTypeOrmOptions = async (): Promise<TypeOrmModuleOptions> => {
       ImagePrintEntity,
       CbcCodeEntity,
       FilePathSetEntity,
-      RuningInfoEntity,
+      RunningInfoEntity,
       ClassOrder,
       DeviceEntity,
     ],

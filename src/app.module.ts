@@ -11,7 +11,7 @@ import { ImagePrintModule } from './settings/report/imagePrint/imagePrint.module
 import { CbcCodeModule } from './settings/report/cbcCode/cbcCode.module';
 import { FilePathSetModule } from './settings/report/filrPathSet/filePathSetModule';
 import { JsonReaderModule } from './jsonReader/jsonReader.module';
-import { RuningInfoModule } from './runingInfo/runingInfo.module';
+import { RunningInfoModule } from './runingInfo/runningInfo.module';
 import { ImagesController } from './images/images.controller';
 import { ExcelService } from './excel/excel.service';
 import { ExcelController } from './excel/excel.controller';
@@ -41,15 +41,22 @@ import { QualityCheckController } from './settings/qualityCheck/qualityCheck.con
 import { BrowserModule } from './browserExit/browser.module';
 import { UploadModule } from './upload/upload.module';
 import { CbcModule } from './lisMakeData/cbc.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import * as path from 'path';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: createTypeOrmOptions,
     }),
-    // TypeOrmModule.forRootAsync({
-    //   useFactory: createLisTypeOrmOptions,
-    // }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
+      // autoSchemaFile: 'src/schema.gql',
+      playground: true,
+      path: 'api/graphql',
+    }),
     UserModule,
     CellImgAnalyzedModule,
     GramRangeModule,
@@ -57,7 +64,7 @@ import { CbcModule } from './lisMakeData/cbc.module';
     CbcCodeModule,
     FilePathSetModule,
     JsonReaderModule,
-    RuningInfoModule,
+    RunningInfoModule,
     CombinedModule,
     IpModule,
     ClassOrderModule,

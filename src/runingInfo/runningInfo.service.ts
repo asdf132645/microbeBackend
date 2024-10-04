@@ -1,60 +1,121 @@
-// runing-info.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, In, Repository, EntityManager, DataSource } from 'typeorm';
-import { RuningInfoEntity } from './runingInfo.entity';
-
+import {
+  Brackets,
+  Between,
+  In,
+  Repository,
+  EntityManager,
+  DataSource,
+} from 'typeorm';
+import { RunningInfoEntity } from './runningInfo.entity';
+import * as moment from 'moment';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
-} from './dto/runingInfoDtoItems';
+} from './dto/runningInfoDtoItems';
 import * as fs from 'fs';
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
 @Injectable()
-export class RuningInfoService {
+export class RunningInfoService {
   constructor(
     private readonly logger: LoggerService,
     private readonly dataSource: DataSource, // 트랜잭션을 사용 하여 비동기 작업의 타이밍 문제를 해결
-    @InjectRepository(RuningInfoEntity)
-    private readonly runingInfoEntityRepository: Repository<RuningInfoEntity>,
+    @InjectRepository(RunningInfoEntity)
+    private readonly runingInfoEntityRepository: Repository<RunningInfoEntity>,
     @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
   ) {}
 
-  async create(createDto: CreateRuningInfoDto): Promise<RuningInfoEntity> {
+  async addUniqueConstraintToSlotId() {
+    try {
+      const entityManager = this.runingInfoEntityRepository.manager;
+
+      // UNIQUE 제약 조건이 이미 있는지 확인
+      const checkQuery = `
+      SELECT COUNT(*)
+      FROM information_schema.TABLE_CONSTRAINTS tc
+      JOIN information_schema.KEY_COLUMN_USAGE kcu
+      ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+      WHERE tc.TABLE_SCHEMA = DATABASE() -- 현재 데이터베이스 선택
+      AND tc.TABLE_NAME = 'runing_info_entity'
+      AND tc.CONSTRAINT_TYPE = 'UNIQUE'
+      AND kcu.COLUMN_NAME = 'slotId';
+    `;
+
+      const checkResult = await entityManager.query(checkQuery);
+
+      // 제약 조건이 이미 존재하면 추가하지 않음
+      if (checkResult[0]['COUNT(*)'] > 0) {
+        console.log('UNIQUE 제약 조건이 이미 존재합니다.');
+        return;
+      }
+
+      // UNIQUE 제약 조건 추가
+      const addQuery = `
+      ALTER TABLE runing_info_entity 
+      ADD CONSTRAINT unique_slotId UNIQUE (slotId);
+    `;
+
+      await entityManager.query(addQuery);
+
+      console.log('slotId에 UNIQUE 제약 조건이 추가되었습니다.');
+    } catch (error) {
+      console.log('오류 발생:', error.message);
+    }
+  }
+
+  async create(createDto: CreateRuningInfoDto): Promise<RunningInfoEntity> {
     const { runingInfoDtoItems } = createDto;
 
+    const analyzedDttm = moment(
+      runingInfoDtoItems.analyzedDttm,
+      'YYYYMMDDHHmm',
+    );
+
+    const startDttm = analyzedDttm.clone().subtract(1, 'hours');
+    const endDttm = analyzedDttm.clone().add(1, 'hours');
+
+    // 시작 시간과 끝 시간을 다시 문자열로 변환
+    const startDttmStr = startDttm.format('YYYYMMDDHHmm');
+    const endDttmStr = endDttm.format('YYYYMMDDHHmm');
+
     return await this.dataSource.transaction(async (manager) => {
-      const existingEntity = await manager.findOne(RuningInfoEntity, {
+      // 동일한 slotId와 analyzedDttm의 앞뒤 1시간 내의 데이터가 있는지 확인
+      const existingEntity = await manager.findOne(RunningInfoEntity, {
         where: {
-          slotId: runingInfoDtoItems.slotId,
+          slotId: runingInfoDtoItems.slotId, // 첫 번째 요소로 접근
+          analyzedDttm: Between(startDttmStr, endDttmStr), // 1시간 범위 내에서 조회
         },
       });
 
       if (existingEntity) {
-        console.log('동일 슬롯아이디 존재 저장 x');
+        console.log(
+          '동일 슬롯아이디 및 1시간 범위 내 analyzedDttm 존재, 저장 x',
+        );
         return null;
       }
 
-      const entity = manager.create(RuningInfoEntity, {
-        ...runingInfoDtoItems,
+      // 새로운 엔티티 생성
+      const entity = manager.create(RunningInfoEntity, {
+        ...runingInfoDtoItems, // 첫 번째 요소로 접근
       });
 
+      // 엔티티 저장
       return await manager.save(entity);
     });
   }
 
-  async findBySlotNo(slotId: string): Promise<RuningInfoEntity | undefined> {
+  async findBySlotNo(slotId: string): Promise<RunningInfoEntity | undefined> {
     return this.runingInfoEntityRepository.findOne({ where: { slotId } });
   }
 
-  async update(updateDto: UpdateRuningInfoDto): Promise<RuningInfoEntity[]> {
+  async update(updateDto: UpdateRuningInfoDto): Promise<RunningInfoEntity[]> {
     const { runingInfoDtoItems } = updateDto;
 
-    const updatedItems: RuningInfoEntity[] = [];
+    const updatedItems: RunningInfoEntity[] = [];
     for (const item of runingInfoDtoItems) {
       const existingEntity = await this.runingInfoEntityRepository.findOne({
         where: { id: item.id },
@@ -130,8 +191,7 @@ export class RuningInfoService {
     patientNm?: string,
     titles?: string[],
     testType?: string,
-    wbcCountOrder?: string,
-  ): Promise<{ data: RuningInfoEntity[]; total: number }> {
+  ): Promise<{ data: RunningInfoEntity[]; total: number }> {
     const queryBuilder =
       this.runingInfoEntityRepository.createQueryBuilder('runInfo');
 
@@ -252,7 +312,7 @@ export class RuningInfoService {
     }
   }
 
-  async getRunningInfoById(id: number): Promise<RuningInfoEntity | null> {
+  async getRunningInfoById(id: number): Promise<RunningInfoEntity | null> {
     const entity = await this.runingInfoEntityRepository.findOne({
       where: { id },
     });
@@ -261,7 +321,7 @@ export class RuningInfoService {
 
   async getRunningInfoClassDetail(
     id: number,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     const entityManager: EntityManager =
       this.runingInfoEntityRepository.manager;
 
@@ -288,13 +348,13 @@ export class RuningInfoService {
     const result = await entityManager.query(query, [id]);
 
     if (result.length > 0) {
-      return result[0] as RuningInfoEntity;
+      return result[0] as RunningInfoEntity;
     } else {
       return null;
     }
   }
 
-  async getRunningInfoClassInfo(id: number): Promise<RuningInfoEntity | null> {
+  async getRunningInfoClassInfo(id: number): Promise<RunningInfoEntity | null> {
     const entityManager: EntityManager =
       this.runingInfoEntityRepository.manager;
 
@@ -313,7 +373,7 @@ export class RuningInfoService {
     const result = await entityManager.query(query, [id]);
 
     if (result.length > 0) {
-      return result[0] as RuningInfoEntity;
+      return result[0] as RunningInfoEntity;
     } else {
       return null;
     }
@@ -321,7 +381,7 @@ export class RuningInfoService {
 
   async getRunningInfoClassInfoMenu(
     id: number,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     const entityManager: EntityManager =
       this.runingInfoEntityRepository.manager;
 
@@ -340,7 +400,7 @@ export class RuningInfoService {
     const result = await entityManager.query(query, [id]);
 
     if (result.length > 0) {
-      return result[0] as RuningInfoEntity;
+      return result[0] as RunningInfoEntity;
     } else {
       return null;
     }
@@ -350,7 +410,7 @@ export class RuningInfoService {
     id: number,
     step: number,
     type: string,
-  ): Promise<Partial<RuningInfoEntity> | null> {
+  ): Promise<Partial<RunningInfoEntity> | null> {
     const entityManager: EntityManager =
       this.runingInfoEntityRepository.manager;
 
@@ -456,7 +516,6 @@ export class RuningInfoService {
       id,
       step - 1,
     ]);
-    console.log('제발', newEntityResult);
 
     if (newEntityResult.length > 0) {
       const result = newEntityResult[0];
@@ -489,7 +548,7 @@ export class RuningInfoService {
         traySlot: result.traySlot,
         moInfo: result.moInfo,
         moMemo: result.moMemo,
-      } as Partial<RuningInfoEntity>;
+      } as Partial<RunningInfoEntity>;
     } else {
       return null;
     }

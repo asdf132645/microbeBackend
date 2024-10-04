@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UploadService } from './upload.service';
-import { RuningInfoEntity } from '../runingInfo/runingInfo.entity';
+import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { UploadController } from './upload.controller';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { LoggerService } from '../logger.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RuningInfoEntity]),
+    TypeOrmModule.forFeature([RunningInfoEntity]),
     RedisModule.forRoot({
       type: 'single',
       url: 'redis://localhost:6379',

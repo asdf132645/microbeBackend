@@ -9,21 +9,21 @@ import {
   Param,
   UseInterceptors,
 } from '@nestjs/common';
-import { RuningInfoService } from './runingInfo.service';
+import { RunningInfoService } from './runningInfo.service';
 import {
   CreateRuningInfoDto,
   UpdateRuningInfoDto,
-} from './dto/runingInfoDtoItems';
-import { RuningInfoEntity } from './runingInfo.entity';
+} from './dto/runningInfoDtoItems';
+import { RunningInfoEntity } from './runningInfo.entity';
 import * as moment from 'moment';
 import { RedisCacheInterceptor } from '../cache/cache.interceptor';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
 @Controller('runningInfo')
-export class RuningInfoController {
+export class RunningInfoController {
   constructor(
-    private readonly runingInfoService: RuningInfoService,
+    private readonly runingInfoService: RunningInfoService,
     @InjectRedis() private readonly redis: Redis, // Redis 인스턴스 주입
   ) {}
 
@@ -33,7 +33,7 @@ export class RuningInfoController {
     @Query('step') step: string,
     @Query('type') type: string,
     @Query('dayQuery') dayQuery: string,
-  ): Promise<Partial<RuningInfoEntity> | null> {
+  ): Promise<Partial<RunningInfoEntity> | null> {
     // console.log('pageUpDown', dayQuery);
     await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
@@ -70,7 +70,7 @@ export class RuningInfoController {
   @Post('create')
   async create(
     @Body() createDto: CreateRuningInfoDto,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     // await this.redis.del(updateDto?.dayQuery);
     // 반환 타입에 null 추가
     // runingInfoDtoItems가 객체일 경우, slotNo의 중복 확인 로직 (데이터베이스 조회)
@@ -107,7 +107,7 @@ export class RuningInfoController {
   @Put('update')
   async update(
     @Body() updateDto: UpdateRuningInfoDto,
-  ): Promise<RuningInfoEntity[]> {
+  ): Promise<RunningInfoEntity[]> {
     await this.redis.del(updateDto?.dayQuery);
     // 데이터베이스 업데이트 수행
     const updatedEntities = await this.runingInfoService.update(updateDto);
@@ -122,7 +122,7 @@ export class RuningInfoController {
   @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoById(
     @Param('id') id: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     return this.runingInfoService.getRunningInfoById(Number(id));
   }
 
@@ -130,7 +130,7 @@ export class RuningInfoController {
   @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoDetailById(
     @Param('id') id: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     return this.runingInfoService.getRunningInfoClassDetail(Number(id));
   }
 
@@ -138,7 +138,7 @@ export class RuningInfoController {
   @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoClassInfoByIdDetail(
     @Param('id') id: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     return this.runingInfoService.getRunningInfoClassInfo(Number(id));
   }
 
@@ -146,7 +146,7 @@ export class RuningInfoController {
   @UseInterceptors(RedisCacheInterceptor)
   async getRunningInfoClassInfoMenuByIdDetail(
     @Param('id') id: string,
-  ): Promise<RuningInfoEntity | null> {
+  ): Promise<RunningInfoEntity | null> {
     return this.runingInfoService.getRunningInfoClassInfoMenu(Number(id));
   }
 
@@ -167,8 +167,7 @@ export class RuningInfoController {
     @Query('patientNm') patientNm?: string,
     @Query('title') titles?: string,
     @Query('testType') testType?: string,
-    @Query('wbcCountOrder') wbcCountOrder?: string,
-  ): Promise<{ data: RuningInfoEntity[]; total: number; page: number }> {
+  ): Promise<{ data: RunningInfoEntity[]; total: number; page: number }> {
     // 입력된 날짜 문자열을 Date 객체로 변환
     const startDate = startDay ? moment(startDay).toDate() : undefined;
     const endDate = endDay ? moment(endDay).toDate() : undefined;
@@ -190,7 +189,6 @@ export class RuningInfoController {
       patientNm,
       titlesArray,
       testType,
-      wbcCountOrder,
     );
 
     return { data: result.data, total: result.total, page };
