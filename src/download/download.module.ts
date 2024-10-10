@@ -5,7 +5,7 @@ import { DownloadController } from './download.controller';
 import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { LoggerService } from '../logger.service';
-import { CombinedModule } from "../combinedProtocol/combined.module";
+import { CombinedModule } from '../combinedProtocol/combined.module';
 
 @Module({
   imports: [

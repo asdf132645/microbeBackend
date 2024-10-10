@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { DownloadService } from './download.service';
 import { DownloadDto, DownloadReturn } from './download.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
@@ -12,10 +12,10 @@ export class DownloadController {
   ) {}
 
   @Post('post')
-  async createBackup(@Body() downloadDto: DownloadDto): Promise<void> {
+  async createBackup(@Body() downloadDto: DownloadDto): Promise<any> {
     const { dayQuery } = downloadDto;
     await this.redis.del(dayQuery);
-    await this.downloadService.backupData(downloadDto);
+    return await this.downloadService.downloadOperation(downloadDto);
   }
 
   @Post('check')
@@ -23,7 +23,7 @@ export class DownloadController {
     @Body()
     downloadDto: Pick<
       DownloadDto,
-      'startDate' | 'endDate' | 'destinationDownloadPath'
+      'startDate' | 'endDate' | 'destinationDownloadPath' | 'originDownloadPath'
     >,
   ): Promise<DownloadReturn> {
     return await this.downloadService.checkIsPossibleToDownload(downloadDto);

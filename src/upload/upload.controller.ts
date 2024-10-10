@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { UploadService } from './upload.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
@@ -17,7 +17,7 @@ export class UploadController {
     body: UploadDto,
   ) {
     await this.redis.flushall();
-    await this.uploadService.changeDatabaseAndExecute(body);
+    await this.uploadService.uploadOperation(body);
     return { message: 'SQL file executed successfully' };
   }
 

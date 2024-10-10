@@ -6,17 +6,25 @@ import * as path from 'path';
 import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { UploadDto } from './upload.dto';
 import { LoggerService } from '../logger.service';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
+import * as os from 'os';
+import { CombinedService } from '../combinedProtocol/combined.service';
+
+const userInfo = os.userInfo();
 
 @Injectable()
 export class UploadService {
+  private moveResults = { success: 0, total: 0 };
+  private readonly pythonScriptPath = `${userInfo.homedir}\\AppData\\Local\\Programs\\UIMD\\UIMD_download_upload_tool\\move_files.exe`;
+
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(RunningInfoEntity)
     private readonly runningInfoRepository: Repository<RunningInfoEntity>,
     private readonly logger: LoggerService,
+    private readonly combinedService: CombinedService,
   ) {}
-  private moveResults = { success: 0, total: 0 };
+
   private listDirectoriesInFolder = async (
     folderPath: string,
   ): Promise<string[]> => {
@@ -172,16 +180,19 @@ export class UploadService {
     }
   };
 
+  // 업로드 가능 여부 체크 함수
   private checkDuplicatedInDatabase = async () => {
     const restoreSql = `SELECT slotId, barcodeNo FROM restore_runing_info_entity`;
 
     const items = await this.dataSource.query(restoreSql);
     const slotIds = items.map((item) => item.slotId);
-    const existingItems = await this.runningInfoRepository.find({
+    const existingItemsInDB = await this.runningInfoRepository.find({
       where: { slotId: In(slotIds) },
     });
 
-    const existingSlotIdSet = new Set(existingItems.map((item) => item.slotId));
+    const existingSlotIdSet = new Set(
+      existingItemsInDB.map((item) => item.slotId),
+    );
 
     const duplicatedSlotIdArr = [];
     const nonDuplicatedSlotIdArr = [];
@@ -208,12 +219,13 @@ export class UploadService {
     };
   };
 
+  // Upload 할때 생성한 temp DB 테이블 삭제 함수
   private deleteTemporaryTable = async () => {
     const deleteTableSql = 'DROP TABLE IF EXISTS `restore_runing_info_entity`';
     await this.dataSource.query(deleteTableSql);
   };
 
-  private deleteImageFolder = async (folderPath) => {
+  private deleteImageFolder = async (folderPath: string) => {
     if (await fs.pathExists(folderPath)) {
       try {
         fs.removeSync(folderPath);
@@ -237,32 +249,42 @@ export class UploadService {
     }
   };
 
-  private async ensurePermissions(path, permission) {
-    try {
-      await fs.access(path, permission);
-    } catch (error) {
-      await fs.chmod(path, 0o666);
-    }
-  }
+  // 이미지 이동은 파이썬 실행파일을 사용
+  private runPythonScript(task: any, uploadType: string) {
+    const { source, destination } = task;
 
-  private retryOperation(operation, retries, delay) {
-    let attempts = 0;
+    const convertedSource = source.replaceAll('\\', '/');
+    const convertedDestination = destination.replaceAll('\\', '/');
 
-    const execute = () => {
-      attempts++;
-      return operation().catch((error) => {
-        if (attempts < retries) {
-          console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms`);
-          return new Promise((resolve) =>
-            setTimeout(() => execute().then(resolve), delay),
-          );
-        } else {
-          return Promise.reject(error);
-        }
+    return new Promise((resolve, reject) => {
+      const result = spawn(`${this.pythonScriptPath}`, [
+        convertedSource,
+        convertedDestination,
+        uploadType,
+      ]);
+
+      // 표준 출력 (stdout) 로그 출력
+      result.stdout.on('data', (data) => {
+        console.log(`Output: ${data}`);
       });
-    };
 
-    return execute();
+      // 표준 에러 (stderr) 로그 출력
+      result.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+      });
+
+      // 프로세스가 완료되면 실행되는 콜백
+      result.on('close', (code) => {
+        this.moveResults.success++;
+        console.log('close code', code);
+        resolve(null);
+      });
+
+      // 프로세스 실행 에러 발생 시
+      result.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 
   private moveImages = async (
@@ -301,69 +323,16 @@ export class UploadService {
 
     this.moveResults.total = availableFileNames.length;
 
-    const moveImageFiles = async (
-      source: string,
-      destination: string,
-      uploadType: 'copy' | 'move',
-    ) => {
-      try {
-        const retries = 5;
-        const delay = 1000;
-        if (
-          (await fs.pathExists(destinationUploadPath)) &&
-          (await fs.pathExists(source))
-        ) {
-          await this.ensurePermissions(
-            source,
-            fs.constants.R_OK | fs.constants.W_OK,
-          );
-          await this.ensurePermissions(
-            destinationUploadPath,
-            fs.constants.W_OK,
-          );
-          const operation = async () => {
-            if (uploadType === 'copy') {
-              await fs.copy(source, destination, { overwrite: true });
-            } else {
-              await fs.move(source, destination, { overwrite: true });
-            }
-          };
-          await this.retryOperation(operation, retries, delay);
-        }
-      } catch (err) {
-        this.logger.logic(
-          `[Upload] Error moving ${source} to ${destination}: ${err}`,
-        );
-      }
-    };
+    const promises = queue.map(
+      async (task) => await this.runPythonScript(task, uploadType),
+    );
 
-    const processQueue = async () => {
-      while (queue.length > 0) {
-        const newTask = queue.shift();
-        if (newTask) {
-          const { source, destination, uploadType } = newTask;
-          await moveImageFiles(source, destination, uploadType);
-        }
-      }
-    };
-
-    await processQueue();
-
-    await new Promise((resolve) => {
-      const checkCompletion = () => {
-        if (queue.length === 0) {
-          resolve(null); // 성공
-        } else {
-          setTimeout(checkCompletion, 1000);
-        }
-      };
-      checkCompletion();
-    });
+    await Promise.all(promises);
 
     return availableIds;
   };
 
-  async changeDatabaseAndExecute(fileInfo: UploadDto): Promise<string> {
+  async uploadOperation(fileInfo: UploadDto): Promise<string> {
     const {
       fileName,
       destinationUploadPath,
@@ -434,6 +403,8 @@ export class UploadService {
         await this.deleteImageFolder(uploadDateFolderName);
       }
 
+      this.combinedService.sendIsDownloadUploadFinished('upload');
+
       return 'Upload completed successfully';
     } catch (e) {
       console.log(e);
@@ -455,7 +426,6 @@ export class UploadService {
     const entries = await fs.readdir(uploadDateFolderName, {
       withFileTypes: true,
     });
-
 
     const sqlFileName = entries
       .filter((entry) => entry.name.includes('.sql'))

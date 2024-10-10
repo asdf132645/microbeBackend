@@ -46,11 +46,6 @@ export class CombinedService
     private readonly browserService: BrowserService,
   ) {}
 
-  // 이전 reqDttm 값을 갱신하는 함수
-  updatePrevReqDttm(reqDttm: string) {
-    this.prevReqDttm = reqDttm;
-  }
-
   afterInit(server: Server) {
     this.wss = server;
   }
@@ -121,7 +116,6 @@ export class CombinedService
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
-          // }
         }
       } catch (e) {
         this.logger.error(
@@ -356,12 +350,11 @@ export class CombinedService
     }
   }
 
-  sendIsDownloadUploadFinished(status: 'download' | 'upload') {
-    const state = {
-      status,
+  sendIsDownloadUploadFinished(type: 'upload' | 'download') {
+    const obj = {
+      type,
       isFinished: true,
     };
-
-    this.wss.emit('downloadUploadFinished', state);
+    this.wss.emit('downloadUploadFinished', obj);
   }
 }

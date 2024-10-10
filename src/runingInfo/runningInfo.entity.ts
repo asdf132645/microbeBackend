@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { MoInfo } from './types/class-info';
 
+@Entity({ name: 'runing_info_entity' })
 @ObjectType()
 @Entity()
 @Unique(['slotId']) // Unique 제약 조건 추가

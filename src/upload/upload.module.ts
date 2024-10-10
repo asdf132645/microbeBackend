@@ -5,9 +5,11 @@ import { RunningInfoEntity } from '../runingInfo/runningInfo.entity';
 import { UploadController } from './upload.controller';
 import { RedisModule, RedisModuleOptions } from '@nestjs-modules/ioredis';
 import { LoggerService } from '../logger.service';
+import { CombinedModule } from '../combinedProtocol/combined.module';
 
 @Module({
   imports: [
+    CombinedModule,
     TypeOrmModule.forFeature([RunningInfoEntity]),
     RedisModule.forRoot({
       type: 'single',
