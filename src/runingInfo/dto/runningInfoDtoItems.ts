@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { MoInfo } from '../types/class-info';
+import { TotalClassInfo } from '../types/class-info';
 
 @ObjectType()
 @InputType()
@@ -59,8 +59,8 @@ export class RunningInfoDtoItems {
   @Field(() => String, { nullable: true })
   cassetId?: string;
 
-  @Field(() => String, { nullable: true })
-  isNormal?: string;
+  @Field(() => Boolean, { nullable: true })
+  isNormal?: boolean;
 
   @Field(() => String, { nullable: true })
   submitState?: string;
@@ -71,11 +71,11 @@ export class RunningInfoDtoItems {
   @Field(() => String, { nullable: true })
   submitUserId?: string;
 
-  @Field(() => MoInfo, { nullable: true })
-  moInfo?: MoInfo;
+  @Field(() => TotalClassInfo, { nullable: true })
+  classInfo?: TotalClassInfo;
 
   @Field(() => String, { nullable: true })
-  moMemo?: string;
+  memo?: string;
 
   @Field(() => String, { nullable: true })
   pcIp?: string;
@@ -94,9 +94,6 @@ export class RunningInfoDtoItems {
 
   @Field(() => String, { nullable: true })
   img_drive_root_path?: string;
-
-  @Field(() => String, { nullable: true })
-  totalMoCount?: string;
 }
 
 @InputType()

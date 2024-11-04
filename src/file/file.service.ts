@@ -35,6 +35,7 @@ export class FileService {
       message: `File not found with any of the extensions: ${this.possibleExtensions.join(', ')}`,
     };
   }
+
   checkFileExists(directoryPath: string, filename: string): boolean {
     const fullPath = path.join(directoryPath, filename);
     return fss.existsSync(fullPath);

@@ -9,29 +9,14 @@ export class GramRange {
   classId: string;
 
   @Column()
-  rareMost: string;
+  rareBoundary: number;
 
   @Column()
-  fewLeast: string;
+  fewBoundary: number;
 
   @Column()
-  fewMost: string;
-
-  @Column()
-  moderateLeast: string;
-
-  @Column()
-  moderateMost: string;
-
-  @Column()
-  manyLeast: string;
-
-  @Column()
-  abbreviation: string;
+  moderateBoundary: number;
 
   @Column()
   fullNm: string;
-
-  @Column()
-  unit: string;
 }

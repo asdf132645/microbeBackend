@@ -139,8 +139,8 @@ export class RunningInfoService {
         existingEntity.tactTime = item.tactTime;
         existingEntity.cassetId = item.cassetId;
         existingEntity.isNormal = item.isNormal;
-        existingEntity.moMemo = item.moMemo;
-        existingEntity.moInfo = item.moInfo;
+        existingEntity.memo = item.memo;
+        existingEntity.classInfo = item.classInfo;
         existingEntity.lock_status = item.lock_status;
         existingEntity.pcIp = item.pcIp;
         existingEntity.submitState = item.submitState;
@@ -245,11 +245,11 @@ export class RunningInfoService {
         .map((title, index) => {
           const titleParam = `title${index}`;
           return `
-            (JSON_SEARCH(runInfo.moInfo, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
+            (JSON_SEARCH(runInfo.classInfo, 'one', :${titleParam}, NULL, '$[*].title') IS NOT NULL
             AND (
               SELECT COUNT(*)
               FROM JSON_TABLE(
-                runInfo.moInfo,
+                runInfo.classInfo,
                 '$[*]' COLUMNS(
                   title VARCHAR(255) PATH '$.title',
                   count INT PATH '$.count'
@@ -338,7 +338,7 @@ export class RunningInfoService {
         cbcSex,
         cbcAge,
         analyzedDttm,
-        moInfo,
+        classInfo,
         img_drive_root_path,
       FROM 
         runing_info_entity
@@ -361,7 +361,7 @@ export class RunningInfoService {
     const query = `
       SELECT 
         id,
-        moInfo,
+        classInfo,
         testType,
         submitState,
         img_drive_root_path
@@ -389,7 +389,7 @@ export class RunningInfoService {
       SELECT 
         id,
         lock_status,
-        moInfo,
+        classInfo,
         testType,
         img_drive_root_path
       FROM 
@@ -453,11 +453,10 @@ export class RunningInfoService {
           orderDttm,
           gender,
           birthDay,
-          totalMoCount,
           isNormal,
-          moInfo,
+          classInfo,
           submitUserId,
-          moMemo,
+          memo,
           pcIp,
           cbcPatientNo,
           cbcPatientNm,
@@ -488,7 +487,6 @@ export class RunningInfoService {
           img_drive_root_path,
           isNormal,
           lock_status,
-          totalMoCount,
           orderDttm,
           patientId,
           patientNm,
@@ -501,8 +499,8 @@ export class RunningInfoService {
           tactTime,
           testType,
           traySlot,
-          moInfo,
-          moMemo
+          classInfo,
+          memo
         FROM 
           runing_info_entity
         WHERE 
@@ -533,7 +531,6 @@ export class RunningInfoService {
         img_drive_root_path: result.img_drive_root_path,
         isNormal: result.isNormal,
         lock_status: result.lock_status,
-        totalMoCount: result.totalMoCount,
         orderDttm: result.orderDttm,
         patientId: result.patientId,
         patientNm: result.patientNm,
@@ -546,8 +543,8 @@ export class RunningInfoService {
         tactTime: result.tactTime,
         testType: result.testType,
         traySlot: result.traySlot,
-        moInfo: result.moInfo,
-        moMemo: result.moMemo,
+        classInfo: result.classInfo,
+        memo: result.memo,
       } as Partial<RunningInfoEntity>;
     } else {
       return null;

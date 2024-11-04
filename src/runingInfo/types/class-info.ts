@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class ClassInfo {
@@ -13,7 +13,7 @@ export class ClassInfo {
 }
 
 @ObjectType()
-export class MoInfo {
+export class TotalClassInfo {
   @Field(() => [ClassInfo], { nullable: true }) // ClassInfo 객체 배열
   classInfo?: ClassInfo[];
 

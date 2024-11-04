@@ -100,6 +100,7 @@ export class ImagesController {
         .send('File not found or permission issue');
     }
   }
+
   @Get('checkImageExists')
   checkImageExists(
     @Query('folder') folder: string,

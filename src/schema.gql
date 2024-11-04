@@ -1,0 +1,54 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ClassInfo {
+  classId: String
+  classNm: String
+  degree: String
+}
+
+type TotalClassInfo {
+  classInfo: [ClassInfo!]
+  categoryId: String
+  categoryNm: String
+}
+
+type RunningInfoEntity {
+  id: Int!
+  lock_status: Boolean
+  traySlot: String
+  slotNo: String
+  barcodeNo: String
+  patientId: String
+  patientNm: String
+  gender: String
+  birthDay: String
+  slotId: String
+  orderDttm: String
+  testType: String
+  analyzedDttm: String
+  tactTime: String
+  cassetId: String
+  isNormal: Boolean
+  classInfo: TotalClassInfo
+  submitState: String
+  submitOfDate: DateTime
+  submitUserId: String
+  memo: String
+  pcIp: String
+  cbcPatientNo: String
+  cbcPatientNm: String
+  cbcSex: String
+  cbcAge: String
+  img_drive_root_path: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  getRunningInfoByIdGQL(id: Int!): RunningInfoEntity!
+}

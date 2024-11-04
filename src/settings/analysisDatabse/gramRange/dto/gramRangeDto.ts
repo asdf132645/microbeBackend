@@ -22,30 +22,15 @@ export class gramRangeItems {
   @IsString()
   classId: string;
 
-  @IsString()
-  rareMost: string;
+  @IsInt()
+  rareBoundary: number;
 
-  @IsString()
-  fewLeast: string;
+  @IsInt()
+  fewBoundary: number;
 
-  @IsString()
-  fewMost: string;
-
-  @IsString()
-  moderateLeast: string;
-
-  @IsString()
-  moderateMost: string;
-
-  @IsString()
-  manyLeast: string;
-
-  @IsString()
-  abbreviation: string;
+  @IsInt()
+  moderateBoundary: number;
 
   @IsString()
   fullNm: string;
-
-  @IsString()
-  unit: string;
 }

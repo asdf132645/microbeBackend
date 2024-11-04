@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { MoInfo } from './types/class-info';
+import { TotalClassInfo } from './types/class-info';
 
 @Entity({ name: 'runing_info_entity' })
 @ObjectType()
@@ -65,19 +65,15 @@ export class RunningInfoEntity {
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar' }) // varchar로 명시
-  totalMoCount?: string;
-
-  @Field(() => String, { nullable: true })
-  @Column({ type: 'varchar' }) // varchar로 명시
   cassetId?: string;
 
-  @Field(() => String, { nullable: true })
-  @Column({ type: 'varchar' }) // varchar로 명시
-  isNormal?: string;
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'boolean' }) // varchar로 명시
+  isNormal?: boolean;
 
-  @Field(() => MoInfo, { nullable: true })
+  @Field(() => TotalClassInfo, { nullable: true })
   @Column('json', { nullable: true }) // JSON으로 저장
-  moInfo?: MoInfo;
+  classInfo?: TotalClassInfo;
 
   @Field(() => String, { nullable: true }) // Boolean 타입으로 명시
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
@@ -93,7 +89,7 @@ export class RunningInfoEntity {
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
-  moMemo?: string;
+  memo?: string;
 
   @Field({ nullable: true }) // nullable 옵션 추가
   @Column({ type: 'varchar', nullable: true }) // varchar로 명시
