@@ -126,16 +126,10 @@ export class CombinedService
     });
 
     client.on('state', (state: any) => {
-      // console.log('state');
       try {
-        if (this.wss) {
-          // console.log('state', state);
-          this.wss.emit('stateVal', state);
-        }
+        if (this.wss) this.wss.emit('stateVal', state);
       } catch (e) {
-        this.logger.error(
-          `🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`,
-        );
+        this.logger.error(`🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`);
       }
     });
 
@@ -161,9 +155,7 @@ export class CombinedService
     client.on('viewerCheck', () => {
       try {
         if (this.wss) {
-          // if (clientIpAddress.includes('127.0.0.1')) {
           this.wss.emit('viewerCheck', ipAddress);
-          // }
         }
       } catch (e) {
         this.logger.error(
@@ -174,9 +166,6 @@ export class CombinedService
 
     client.on('disconnect', async () => {
       console.log(clientIpAddress);
-      // if (!clientIpAddress.includes('192.168.0.131')) {
-      //   await this.browserService.closeNodeProcesses();
-      // }
       await this.runingInfoService.redisAllClear();
       this.logger.log('WebSocket 클라이언트 연결 끊김');
     });

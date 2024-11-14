@@ -32,8 +32,7 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() createUserDto: CreateUserDto) {
-    const result = await this.userService.create(createUserDto);
-    return result;
+    return await this.userService.create(createUserDto);
   }
 
   @Get(':userId')
