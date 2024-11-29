@@ -34,7 +34,6 @@ export class RunningInfoController {
     @Query('type') type: string,
     @Query('dayQuery') dayQuery: string,
   ): Promise<Partial<RunningInfoEntity> | null> {
-    // console.log('pageUpDown', dayQuery);
     await this.redis.del(dayQuery); // 해당 쿼리로 생성된 캐시 삭제
     return this.runingInfoService.getUpDownRunnInfo(
       Number(id),

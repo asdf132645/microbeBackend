@@ -18,7 +18,7 @@ import * as fs from 'fs';
 import { LoggerService } from '../logger.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import { exec } from "child_process";
+import { exec } from 'child_process';
 
 @Injectable()
 export class RunningInfoService {
@@ -166,22 +166,23 @@ export class RunningInfoService {
       });
 
       if (result.affected > 0) {
-        for (const rootPath of rootPaths) {
-          exec(`rmdir /s /q "${rootPath}"`, (error) => {
-            if (error) {
+        await Promise.all(
+          rootPaths.map(async (rootPath) => {
+            try {
+              await exec(`rmdir /s /q "${rootPath}"`);
+              console.log(
+                `Folder at ${rootPath} has been deleted successfully`,
+              );
+            } catch (error) {
               console.error(
                 `Failed to delete folder at ${rootPath}:`,
                 error.message,
               );
-            } else {
-              console.log(
-                `Folder at ${rootPath} has been deleted successfully`,
-              );
             }
-          });
-        }
+          }),
+        );
+        return true;
       }
-      return result.affected > 0; // affected가 0보다 크면 성공
     } catch (error) {
       console.error('Error while deleting entities:', error);
       return false; // 삭제 실패

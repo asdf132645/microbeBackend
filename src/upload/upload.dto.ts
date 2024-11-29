@@ -4,5 +4,4 @@ export class UploadDto {
   originUploadPath: string;
   dayQuery: any;
   uploadType: 'copy' | 'move';
-  projectType: 'bm' | 'pb';
 }

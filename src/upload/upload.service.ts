@@ -336,13 +336,9 @@ export class UploadService {
     const {
       fileName,
       destinationUploadPath,
-      projectType,
       originUploadPath,
       uploadType,
     } = fileInfo;
-
-    const databaseName =
-      projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
 
     await this.deleteTemporaryTable();
 
@@ -381,7 +377,7 @@ export class UploadService {
       const folderNamesArr =
         await this.listDirectoriesInFolder(uploadDateFolderName);
 
-      await this.dataSource.query(`USE ${databaseName}`);
+      await this.dataSource.query(`USE mo_db_web`);
 
       await this.createTemporaryTable(sqlFilePath);
 
@@ -412,11 +408,8 @@ export class UploadService {
   }
 
   async checkDuplicatedData(fileInfo: UploadDto): Promise<any> {
-    const { fileName, destinationUploadPath, originUploadPath, projectType } =
+    const { fileName, destinationUploadPath, originUploadPath } =
       fileInfo;
-
-    const databaseName =
-      projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
 
     await this.deleteTemporaryTable();
 
@@ -446,7 +439,7 @@ export class UploadService {
         return 'Download file does not exist';
       }
 
-      await this.dataSource.query(`USE ${databaseName}`);
+      await this.dataSource.query(`USE mo_db_web`);
 
       await this.createTemporaryTable(sqlFilePath);
 

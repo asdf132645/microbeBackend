@@ -214,10 +214,9 @@ export class DownloadService {
       originDownloadPath,
       destinationDownloadPath,
       downloadType,
-      projectType,
     } = downloadDto;
 
-    const downloadPath = `${destinationDownloadPath.split(':')[0]}:\\UIMD_${projectType.toUpperCase()}_backup`;
+    const downloadPath = `${destinationDownloadPath.split(':')[0]}:\\UIMD_MO_backup`;
     const downloadDateFolder = path.join(
       downloadPath,
       `${startDate}_${endDate}`,
@@ -270,9 +269,7 @@ export class DownloadService {
       downloadDateFolder,
       `backup-${startDate}_${endDate}.sql`,
     );
-    const schema =
-      projectType.toUpperCase() === 'PB' ? 'pb_db_web' : 'bm_db_web';
-    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 ${schema} runing_info_entity --where="analyzedDttm BETWEEN '${this.formatDate(moment(startDate).toDate(), 'start')}' AND '${this.formatDate(moment(endDate).toDate(), 'end')}'" > ${backupFile}`;
+    const dumpCommand = `mysqldump --user=root --password=uimd5191! --host=127.0.0.1 mo_db_web runing_info_entity --where="analyzedDttm BETWEEN '${this.formatDate(moment(startDate).toDate(), 'start')}' AND '${this.formatDate(moment(endDate).toDate(), 'end')}'" > ${backupFile}`;
 
     await this.execCommand(dumpCommand);
 
