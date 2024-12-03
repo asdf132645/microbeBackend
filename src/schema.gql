@@ -4,14 +4,16 @@
 
 type ClassInfo {
   classId: String
-  classNm: String
-  degree: String
+  beforeGrade: String
+  afterGrade: String
+  count: Float!
 }
 
 type TotalClassInfo {
+  id: String
+  name: String
   classInfo: [ClassInfo!]
-  categoryId: String
-  categoryNm: String
+  detailMemo: String
 }
 
 type RunningInfoEntity {

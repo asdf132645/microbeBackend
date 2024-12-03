@@ -16,56 +16,56 @@ export class RunningInfoDtoItems {
   @Field(() => Int)
   id: number;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean)
   lock_status?: boolean;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   @IsString()
   traySlot?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   slotNo?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   barcodeNo?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   patientId?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   patientNm?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   gender?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   birthDay?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   slotId?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   orderDttm?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   testType?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   analyzedDttm?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   tactTime?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   cassetId?: string;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean)
   isNormal?: boolean;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   submitState?: string;
 
-  @Field(() => Date, { nullable: true })
+  @Field(() => Date)
   submitOfDate?: Date;
 
   @Field(() => String, { nullable: true })

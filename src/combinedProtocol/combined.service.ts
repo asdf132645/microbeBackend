@@ -30,7 +30,6 @@ export class CombinedService
   connectedClient: net.Socket | null = null;
   public count: number = 0; // 요청 처리 횟수를 저장하는 변수 추가
   public reqArr: any = [];
-  public prevReqDttm: string | null = null; // 직전 요청의 reqDttm 저장
   clients: Socket[] = [];
   public notRes: boolean = false;
   private serverIp: any; // 서버의 IP 주소 저장
@@ -39,6 +38,8 @@ export class CombinedService
   private reconnectDelay: number = 1000; // 재연결 시도 지연 (밀리초 단위)
   private mainPc: boolean = true;
   private isNotDownloadOrUploading = true;
+  private tcpQueue: any[] = [];
+  private isProcessing = false;
 
   constructor(
     private readonly logger: LoggerService,
@@ -108,7 +109,7 @@ export class CombinedService
       try {
         if (this.wss) {
           delete message.payload?.anyWay;
-          if (!client.conn.remoteAddress.includes('192.168.0.131')) {
+          if (!client.conn.remoteAddress.includes('192.168.0.115')) {
             this.logger.log(
               `웹소켓 프론트에서 받은 데이터 ${JSON.stringify(message.payload)}`,
             );
@@ -129,7 +130,9 @@ export class CombinedService
       try {
         if (this.wss) this.wss.emit('stateVal', state);
       } catch (e) {
-        this.logger.error(`🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`);
+        this.logger.error(
+          `🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`,
+        );
       }
     });
 
@@ -210,52 +213,50 @@ export class CombinedService
   }
 
   sendDataToEmbeddedServer(data: any): void {
-    if (this.connectedClient && !this.connectedClient.destroyed) {
-      try {
+    // 데이터 중복 체크
+    if (
+      this.tcpQueue.some(
+        (item) => JSON.stringify(item) === JSON.stringify(data),
+      )
+    ) {
+      this.logger.warn('⚠️ 중복 데이터로 인해 전송이 무시되었습니다.');
+      return;
+    }
+
+    // 데이터 큐에 추가
+    this.tcpQueue.push(data);
+    this.processQueue(); // 큐 처리 시작
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || !this.tcpQueue.length) {
+      return;
+    }
+
+    this.isProcessing = true; // 처리 중 상태로 설정
+    const data = this.tcpQueue.shift(); // 큐에서 데이터 가져오기
+
+    try {
+      if (this.connectedClient && !this.connectedClient.destroyed) {
         const serializedData = JSON.stringify(data.payload);
 
-        // 데이터 전송 속도 조절을 위한 지연 추가
-        const throttleDelay = 100; // 100ms 지연
+        if (serializedData && this.isNotDownloadOrUploading) {
+          this.connectedClient.write(serializedData);
+          this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
+          this.notRes = true;
 
-        setTimeout(() => {
-          if (!serializedData) {
-            return;
-          }
-
-          // this.connectedClient가 유효한지 확인
-          if (
-            this.connectedClient &&
-            typeof this.connectedClient.write === 'function' &&
-            this.isNotDownloadOrUploading
-          ) {
-            this.notRes = true;
-            this.connectedClient.write(serializedData);
-            this.logger.log(`웹백엔드 -> 코어로 전송: ${serializedData}`);
-          } else {
-            console.error('connectedClient가 유효하지 않습니다.');
-          }
-        }, throttleDelay);
-
-        if (
-          data.payload.jobCmd === 'INIT' ||
-          data.payload.jobCmd === 'RBC_RE_CLASSIFICATION' ||
-          data.payload.jobCmd === 'START' ||
-          data.payload.jobCmd === 'STOP' ||
-          data.payload.jobCmd === 'RUNNING_COMP' ||
-          data.payload.jobCmd === 'PAUSE' ||
-          data.payload.jobCmd === 'RESTART' ||
-          data.payload.jobCmd === 'RECOVERY'
-        ) {
-          this.notRes = false;
+          // 데이터 전송 후 일정 시간 대기 (예: 100ms)
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-      } catch (error) {
-        this.logger.error(`🚨 데이터 직렬화 오류: ${error.message}`);
+      } else {
+        this.logger.warn('⚠️ 활성화된 코어 TCP 없음. 데이터 전송 안됨.');
+        this.notRes = false;
       }
-    } else {
-      this.notRes = false;
-      this.logger.warn(
-        '⚠️ 활성화된 코어 TCP 없음. 데이터 전송 안됨 코어 tcp 연결 확인 필요.',
-      );
+    } catch (error) {
+      this.logger.error(`🚨 TCP 데이터 전송 오류: ${error.message}`);
+    } finally {
+      this.isProcessing = false; // 처리 상태 해제
+      await this.processQueue(); // 다음 큐 처리
     }
   }
 
@@ -319,9 +320,8 @@ export class CombinedService
   }
 
   private handleReconnectFailure(client: net.Socket) {
-    if (!this.mainPc) {
-      return;
-    }
+    if (!this.mainPc) return;
+
     this.reconnectAttempts++;
     client.destroy(); // 기존 소켓 종료
     this.connectedClient = null;

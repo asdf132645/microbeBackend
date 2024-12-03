@@ -6,20 +6,26 @@ export class ClassInfo {
   classId?: string;
 
   @Field(() => String, { nullable: true })
-  classNm?: string;
+  beforeGrade?: string;
 
   @Field(() => String, { nullable: true })
-  degree?: string;
+  afterGrade?: string;
+
+  @Field(() => Number)
+  count?: number;
 }
 
 @ObjectType()
 export class TotalClassInfo {
+  @Field(() => String, { nullable: true })
+  id?: string;
+
+  @Field(() => String, { nullable: true })
+  name?: string;
+
   @Field(() => [ClassInfo], { nullable: true }) // ClassInfo 객체 배열
   classInfo?: ClassInfo[];
 
-  @Field(() => String, { nullable: true })
-  categoryId?: string;
-
-  @Field(() => String, { nullable: true })
-  categoryNm?: string;
+  @Field(() => String, { nullable: true})
+  detailMemo?: string;
 }

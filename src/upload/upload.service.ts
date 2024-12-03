@@ -145,26 +145,17 @@ export class UploadService {
         patientNm: item.patientNm,
         gender: item.gender,
         birthDay: item.birthDay,
-        wbcCount: item.wbcCount,
         slotId: item.slotId,
         orderDttm: item.orderDttm,
         analyzedDttm: item.analyzedDttm,
         tactTime: item.tactTime,
         isNormal: item.isNormal,
         cassetId: item.cassetId,
-        wbcMemo: item.wbcMemo,
-        rbcMemo: item.rbcMemo,
-        wbcInfo: item.wbcInfo,
-        wbcInfoAfter: item.wbcInfoAfter,
-        rbcInfo: item.rbcInfo,
-        rbcInfoAfter: item.rbcInfoAfter,
-        rbcInfoPosAfter: item.rbcInfoPosAfter,
-        maxWbcCount: item.maxWbcCount,
-        bf_lowPowerPath: item.bf_lowPowerPath,
+        memo: item.memo,
+        classInfo: item.classInfo,
         submitState: item.submitState,
         submitOfDate: item.submitOfDate,
         submitUserId: item.submitUserId,
-        isNsNbIntegration: item.isNsNbIntegration,
         pcIp: item.pcIp,
         cbcPatientNo: item.cbcPatientNo,
         cbcPatientNm: item.cbcPatientNm,
@@ -355,7 +346,6 @@ export class UploadService {
     const sqlFilePath = `${uploadDateFolderName}\\${sqlFileName}`;
 
     try {
-      // PBIA_proc or BMIA_proc 없을 시 생성 코드
       if (!(await fs.pathExists(destinationUploadPath))) {
         await fs.ensureDir(destinationUploadPath);
       }
