@@ -40,6 +40,7 @@ export class CombinedService
   private isNotDownloadOrUploading = true;
   private tcpQueue: any[] = [];
   private isProcessing = false;
+  private tcpPort = 11235;
 
   constructor(
     private readonly logger: LoggerService,
@@ -76,10 +77,8 @@ export class CombinedService
   }
 
   extractIPAddress(inputString: string | string[]): string | null {
-    if (Array.isArray(inputString)) {
-      // inputString이 배열인 경우
-      return null; // 또는 다른 처리
-    }
+    if (Array.isArray(inputString)) return null;
+
     const ipAddressRegex = /\d+\.\d+\.\d+\.\d+/;
     const ipAddressMatch = inputString.match(ipAddressRegex);
     return ipAddressMatch ? ipAddressMatch[0] : null;
@@ -157,9 +156,7 @@ export class CombinedService
 
     client.on('viewerCheck', () => {
       try {
-        if (this.wss) {
-          this.wss.emit('viewerCheck', ipAddress);
-        }
+        if (this.wss) this.wss.emit('viewerCheck', ipAddress);
       } catch (e) {
         this.logger.error(
           `🚨 WebSocket 프론트(viewerCheck) 메시지 처리 중 오류 발생: ${e.message}`,
@@ -182,7 +179,7 @@ export class CombinedService
     this.sendDataToEmbeddedServer(message);
 
     if (!this.connectedClient || this.connectedClient.destroyed) {
-      this.setupTcpServer('localhost', 11235);
+      this.setupTcpServer('localhost', this.tcpPort);
     }
   }
 
@@ -229,9 +226,7 @@ export class CombinedService
   }
 
   private async processQueue(): Promise<void> {
-    if (this.isProcessing || !this.tcpQueue.length) {
-      return;
-    }
+    if (this.isProcessing || !this.tcpQueue.length) return;
 
     this.isProcessing = true; // 처리 중 상태로 설정
     const data = this.tcpQueue.shift(); // 큐에서 데이터 가져오기
@@ -332,7 +327,7 @@ export class CombinedService
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       setTimeout(
-        () => this.setupTcpServer('localhost', 11235),
+        () => this.setupTcpServer('localhost', this.tcpPort),
         this.reconnectDelay,
       );
       // 연결 실패 후 즉시 재시도를 방지 - 끊기고 나서 바로 재연결 시도하면 여러가지 문제발생 할 수 있어서 바로 재시작 안함

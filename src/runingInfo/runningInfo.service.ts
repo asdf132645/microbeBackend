@@ -49,10 +49,7 @@ export class RunningInfoService {
       const checkResult = await entityManager.query(checkQuery);
 
       // 제약 조건이 이미 존재하면 추가하지 않음
-      if (checkResult[0]['COUNT(*)'] > 0) {
-        console.log('UNIQUE 제약 조건이 이미 존재합니다.');
-        return;
-      }
+      if (checkResult[0]['COUNT(*)'] > 0) return;
 
       // UNIQUE 제약 조건 추가
       const addQuery = `
