@@ -77,8 +77,10 @@ export class CombinedService
   }
 
   extractIPAddress(inputString: string | string[]): string | null {
-    if (Array.isArray(inputString)) return null;
-
+    if (Array.isArray(inputString)) {
+      // inputString이 배열인 경우
+      return null; // 또는 다른 처리
+    }
     const ipAddressRegex = /\d+\.\d+\.\d+\.\d+/;
     const ipAddressMatch = inputString.match(ipAddressRegex);
     return ipAddressMatch ? ipAddressMatch[0] : null;
@@ -114,6 +116,10 @@ export class CombinedService
             );
           }
 
+          if (!['SYSINFO', 'RUNNING_INFO'].includes(message.payload.jobCmd)) {
+            this.notRes = false;
+          }
+
           if (!this.notRes) {
             this.webSocketGetData(message);
           }
@@ -127,7 +133,10 @@ export class CombinedService
 
     client.on('state', (state: any) => {
       try {
-        if (this.wss) this.wss.emit('stateVal', state);
+        if (this.wss) {
+          // console.log('state', state);
+          this.wss.emit('stateVal', state);
+        }
       } catch (e) {
         this.logger.error(
           `🚨 WebSocket 프론트 메시지 처리 중 오류 발생: ${e.message}`,
@@ -156,7 +165,11 @@ export class CombinedService
 
     client.on('viewerCheck', () => {
       try {
-        if (this.wss) this.wss.emit('viewerCheck', ipAddress);
+        if (this.wss) {
+          // if (clientIpAddress.includes('127.0.0.1')) {
+          this.wss.emit('viewerCheck', ipAddress);
+          // }
+        }
       } catch (e) {
         this.logger.error(
           `🚨 WebSocket 프론트(viewerCheck) 메시지 처리 중 오류 발생: ${e.message}`,
@@ -209,7 +222,7 @@ export class CombinedService
     }
   }
 
-  sendDataToEmbeddedServer(data: any): void {
+  async sendDataToEmbeddedServer(data: any): Promise<void> {
     // 데이터 중복 체크
     if (
       this.tcpQueue.some(
@@ -222,11 +235,14 @@ export class CombinedService
 
     // 데이터 큐에 추가
     this.tcpQueue.push(data);
-    this.processQueue(); // 큐 처리 시작
+
+    await this.processQueue(); // 큐 처리 시작
   }
 
   private async processQueue(): Promise<void> {
-    if (this.isProcessing || !this.tcpQueue.length) return;
+    if (this.isProcessing || !this.tcpQueue.length) {
+      return;
+    }
 
     this.isProcessing = true; // 처리 중 상태로 설정
     const data = this.tcpQueue.shift(); // 큐에서 데이터 가져오기
@@ -299,7 +315,7 @@ export class CombinedService
 
         newClient.on('error', (err: any) => {
           this.logger.error(
-            `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류`,
+            `🚨[${err.code} - 코어 서버 연결 거부] 코어 TCP 연결 오류 - ${err}`,
           );
           this.sendDataToWebSocketClients({ err: true });
           this.handleReconnectFailure(newClient);
@@ -315,8 +331,9 @@ export class CombinedService
   }
 
   private handleReconnectFailure(client: net.Socket) {
-    if (!this.mainPc) return;
-
+    if (!this.mainPc) {
+      return;
+    }
     this.reconnectAttempts++;
     client.destroy(); // 기존 소켓 종료
     this.connectedClient = null;
