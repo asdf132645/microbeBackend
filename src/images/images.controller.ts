@@ -13,6 +13,7 @@ import { Response } from 'express';
 import * as path from 'path';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
+import * as jimp from 'jimp';
 import { ImagesService } from './images.service';
 import * as fs from 'fs-extra';
 
@@ -35,7 +36,7 @@ export class ImagesController {
       const imageBuffer = await sharp(absoluteImagePath)
         .toFormat('webp', {
           quality: 10,
-          nearLossless: true
+          nearLossless: true,
         })
         .resize({ width: 290, height: 290, fit: 'contain' })
         .toBuffer();
@@ -91,19 +92,51 @@ export class ImagesController {
       // 파일 접근 권한 확인
       fs.accessSync(absoluteImagePath, fs.constants.R_OK);
       sharp(absoluteImagePath)
-        .resize({ width: 900 })
+        .resize({ width: 200 })
         .toBuffer()
         .then((imageBuffer) => {
           res.contentType('image/webp');
           res.send(imageBuffer);
         })
         .catch((error) => {
-          res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Image processing error');
-        })
+          res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send('Image processing error');
+        });
     } catch (error) {
       res
         .status(HttpStatus.NOT_FOUND)
         .send('File not found or permission issue');
+    }
+  }
+
+  @Get('getStitchingImage')
+  async getStitchingImage(
+    @Query('folder') folder: string,
+    @Query('imageName') imageName: string,
+    @Res() res: Response,
+  ) {
+    if (!folder || !imageName) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid parameters');
+    }
+
+    // 파일 경로를 절대 경로로 조합
+    const absoluteImagePath = path.join(folder.replace(/\//g, '\\'), imageName);
+
+    try {
+      const image = await jimp.read(absoluteImagePath);
+      const buffer = await image.getBufferAsync(jimp.MIME_PNG);
+      const webpBuffer = await sharp(buffer)
+        .toFormat('webp', { quality: 10, nearLossless: true })
+        .toBuffer();
+
+      res.setHeader('Content-Type', 'image/webp');
+      res.send(webpBuffer);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Image processing error');
     }
   }
 
