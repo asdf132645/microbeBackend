@@ -25,7 +25,4 @@ export class TotalClassInfo {
 
   @Field(() => [ClassInfo], { nullable: true }) // ClassInfo 객체 배열
   classInfo?: ClassInfo[];
-
-  @Field(() => String, { nullable: true})
-  detailMemo?: string;
 }

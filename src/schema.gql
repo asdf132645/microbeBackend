@@ -13,7 +13,6 @@ type TotalClassInfo {
   id: String
   name: String
   classInfo: [ClassInfo!]
-  detailMemo: String
 }
 
 type RunningInfoEntity {
