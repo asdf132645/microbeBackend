@@ -167,13 +167,14 @@ export class ImagesController {
     }
   }
 
-  @Get('getImageWbc')
-  async getImageWbc(
+  @Get('getImageBySize')
+  async getImageBySize(
     @Query('folder') folder: string,
+    @Query('size') size: string,
     @Query('imageName') imageName: string,
     @Res() res: Response,
   ) {
-    await this.imagesService.getImageWbc(folder, imageName, res);
+    await this.imagesService.getImageBySize(folder, imageName, size, res);
   }
 
   @Post('upload')
